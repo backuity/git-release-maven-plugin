@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class VersionTest {
 	@Test
-	public void versionShouldExtractHugeMajorMinor() {
+	public void versionShouldExtractMajorMinorBugFix() {
 		Version version = new Version( "1.2.34" );
 		assertEquals(1, version.getMajor());
 		assertEquals(2, version.getMinor());
@@ -20,7 +20,7 @@ public class VersionTest {
 	}
 	
 	@Test
-	public void versionShouldExtractHugeMajorMinorType() {
+	public void versionShouldExtractMajorMinorBugFixType() {
 		Version version = new Version( "1.2.34-SNAPSHOT" );
 		assertEquals(1, version.getMajor());
 		assertEquals(2, version.getMinor());

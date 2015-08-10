@@ -14,7 +14,7 @@ public abstract class ReleaseMojo extends AbstractMojo {
 	@Parameter
 	private File installWithDependencies;
 	
-	/** @parameter expression="${project}" */
+	@Parameter(defaultValue = "${project}")
 	private MavenProject project;
 	
 	/**

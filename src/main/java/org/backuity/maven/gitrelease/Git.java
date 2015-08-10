@@ -8,7 +8,8 @@ import java.io.InputStream;
 
 public class Git {
 
-    private static final String NOTHING_TO_COMMIT = "nothing to commit (working directory clean)";
+    private static final String NOTHING_TO_COMMIT = "nothing to commit";
+    private static final String WORKING_DIRECTORY_CLEAN = "working directory clean";
 
     /**
      * git commit -a -m commitMessage
@@ -21,7 +22,8 @@ public class Git {
      * @return true if there's nothing to commit
      */
     public static boolean isNothingToCommit() throws GitException {
-        return executeToString( "status" ).contains( NOTHING_TO_COMMIT );
+        String status = executeToString("status");
+        return status.contains(NOTHING_TO_COMMIT) && status.contains(WORKING_DIRECTORY_CLEAN);
     }
 
     /**
