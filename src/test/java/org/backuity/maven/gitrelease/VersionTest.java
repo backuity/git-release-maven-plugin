@@ -3,9 +3,11 @@ package org.backuity.maven.gitrelease;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import junit.framework.Assert;
 
+import org.fest.assertions.Assertions;
 import org.junit.Test;
 
 
@@ -13,20 +15,20 @@ public class VersionTest {
 	@Test
 	public void versionShouldExtractMajorMinorBugFix() {
 		Version version = new Version( "1.2.34" );
-		assertEquals(1, version.getMajor());
-		assertEquals(2, version.getMinor());
-		assertEquals(34, version.getBugFix());
-		assertNull( version.getType() );
+		assertThat(version.getMajor()).isEqualTo(1);
+		assertThat(version.getMinor()).isEqualTo(2);
+		assertThat(version.getBugFix()).isEqualTo(34);
+		assertThat(version.getType()).isNull();
 	}
 	
 	@Test
 	public void versionShouldExtractMajorMinorBugFixType() {
 		Version version = new Version( "1.2.34-SNAPSHOT" );
-		assertEquals(1, version.getMajor());
-		assertEquals(2, version.getMinor());
-		assertEquals(34, version.getBugFix());
-		assertEquals( "SNAPSHOT", version.getType() );
-		assertTrue( version.isSnapshot() );
+		assertThat(version.getMajor()).isEqualTo(1);
+		assertThat(version.getMinor()).isEqualTo(2);
+		assertThat(version.getBugFix()).isEqualTo(34);
+		assertThat(version.getType()).isEqualTo("SNAPSHOT");
+		assertThat(version.isSnapshot()).isTrue();
 	}
 	
 	@Test

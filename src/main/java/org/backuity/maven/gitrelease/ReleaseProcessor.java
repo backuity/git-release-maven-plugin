@@ -86,10 +86,8 @@ public class ReleaseProcessor {
 		// (the second push wont be really costly anyway)
 		push( skipPush );
 		
-		PomEditor pomEditor = new PomEditor( project.getFile() );
-		
 		if( ! releaseVersion.equals( currentVersion ) ) {
-			updateVersion( releaseVersion, pomEditor );
+			updateVersion( releaseVersion, project.getFile() );
 			
 			try {
 				Git.tag( releaseVersion.toString() );
@@ -101,7 +99,7 @@ public class ReleaseProcessor {
 			}
 			
 			try {
-				deploy( pomEditor.getFile() );
+				deploy( project.getFile() );
 			} catch( Exception e ) {
 				rollbackRelease(releaseVersion);
 				throw new Exception( "Release failed, can't deploy : " + 
@@ -114,8 +112,8 @@ public class ReleaseProcessor {
 		try {
 			installWithDependencies( project, releaseVersion, installWithDependencies );
 			
-			updateVersion( postReleaseVersion, pomEditor );
-			install( pomEditor.getFile() );
+			updateVersion( postReleaseVersion, project.getFile() );
+			install( project.getFile() );
 			push( skipPush );
 		} catch( Exception e ) {
 			// At that point we've deploy the app so we don't really want to rollback
@@ -278,8 +276,8 @@ public class ReleaseProcessor {
 		}
 	}
 
-	private void updateVersion(Version version, PomEditor pomEditor) throws IOException, GitException {
-		pomEditor.updateVersion( version );
+	private void updateVersion(Version version, File pomFile) throws IOException, CommandLineException, MavenInvocationException {
+		executeGoals(pomFile, "versions:set -DnewVersion=" + version + " -DgenerateBackupPoms=false");
 		Git.stageAndCommit( "updated version to " + version );
 	}
 	

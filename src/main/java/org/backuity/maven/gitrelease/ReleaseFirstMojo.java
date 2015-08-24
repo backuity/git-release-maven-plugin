@@ -9,7 +9,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-@Mojo(name = "first")
+@Mojo(name = "first",
+	  aggregator = true)
 public class ReleaseFirstMojo extends AbstractMojo {
 
 	@Parameter
