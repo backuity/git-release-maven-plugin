@@ -30,7 +30,11 @@ public class ReleaseProcessor {
 	/**
 	 * @param installWithDependencies if not null assemble with dependencies and copy to installWithDependencies
 	 */
-	public void release( ReleaseMode mode, MavenProject project, File installWithDependencies, boolean skipPush ) throws Exception {		
+	public void release( ReleaseMode mode,
+						 MavenProject project,
+						 File installWithDependencies,
+						 boolean runTests,
+						 boolean skipPush ) throws Exception {
 		checkNoSnapshotDependency(project);		
 		Version currentVersion = new Version( project.getVersion() );		
 		
@@ -43,7 +47,7 @@ public class ReleaseProcessor {
 				
 		Version postReleaseVersion = releaseVersion.increaseBugFix().snapshot();
 		
-		release( project, currentVersion, releaseVersion, postReleaseVersion, installWithDependencies, skipPush );
+		release( project, currentVersion, releaseVersion, postReleaseVersion, installWithDependencies, runTests, skipPush );
 	}
 
 
@@ -52,7 +56,7 @@ public class ReleaseProcessor {
 	 * post-release version to 1.0.1-SNAPSHOT
 	 * @param installWithDependencies if not null assemble with dependencies and copy to installWithDependencies
 	 */
-	public void releaseFirst(MavenProject project, File installWithDependencies, boolean skipPush ) throws Exception {
+	public void releaseFirst(MavenProject project, File installWithDependencies, boolean runTests, boolean skipPush ) throws Exception {
 		checkNoSnapshotDependency(project);
 		
 		Version currentVersion = null;
@@ -71,14 +75,21 @@ public class ReleaseProcessor {
 				FIRST_VERSION, 
 				new Version( "1.0.1-SNAPSHOT" ),
 				installWithDependencies,
+				runTests,
 				skipPush );
 	}
 	
 	/**
 	 * @param currentVersion can be null
 	 */
-	private void release( MavenProject project, Version currentVersion, Version releaseVersion, Version postReleaseVersion, 
-			File installWithDependencies, boolean skipPush ) throws Exception {		
+	private void release( MavenProject project,
+						  Version currentVersion,
+						  Version releaseVersion,
+						  Version postReleaseVersion,
+						  File installWithDependencies,
+						  boolean runTests,
+						  boolean skipPush ) throws Exception {
+
 		checkRepository();
 		checkWorkingTree();
 		
@@ -99,7 +110,7 @@ public class ReleaseProcessor {
 			}
 			
 			try {
-				deploy( project.getFile() );
+				deploy( project.getFile(), runTests );
 			} catch( Exception e ) {
 				rollbackRelease(releaseVersion);
 				throw new Exception( "Release failed, can't deploy : " + 
@@ -110,10 +121,11 @@ public class ReleaseProcessor {
 		}
 				
 		try {
-			installWithDependencies( project, releaseVersion, installWithDependencies );
+			installWithDependencies( project, releaseVersion, installWithDependencies);
 			
 			updateVersion( postReleaseVersion, project.getFile() );
-			install( project.getFile() );
+			install( project.getFile(), false ); // don't run the tests as we haven't changed anything in the code
+			                                     // and we've already run the tests above
 			push( skipPush );
 		} catch( Exception e ) {
 			// At that point we've deploy the app so we don't really want to rollback
@@ -166,8 +178,8 @@ public class ReleaseProcessor {
 	 */
 	private void rollbackRelease(Version version) throws Exception {
 		try {
-			log.info( "Rolling back " + version + " - if the artifact has already been deployed you'll " +
-					"need to manually remove it from the remote repository." );
+			log.info("Rolling back " + version + " - if the artifact has already been deployed you'll " +
+					"need to manually remove it from the remote repository.");
 			try {
 				Git.deleteTag(version.toString());
 				log.info( "Deleted tag " + version );
@@ -228,7 +240,7 @@ public class ReleaseProcessor {
 	}
 
 	private void installWithDependencies(MavenProject project, Version version,
-			File installWithDependencies) throws Exception {
+										 File installWithDependencies) throws Exception {
 		if( installWithDependencies != null ) {
 			try {
 				assembleWithDependencies( project.getFile() );
@@ -278,19 +290,26 @@ public class ReleaseProcessor {
 
 	private void updateVersion(Version version, File pomFile) throws IOException, CommandLineException, MavenInvocationException {
 		executeGoals(pomFile, "versions:set -DnewVersion=" + version + " -DgenerateBackupPoms=false");
-		Git.stageAndCommit( "updated version to " + version );
+		Git.stageAndCommit("updated version to " + version);
 	}
 	
 	private void assembleWithDependencies(File pomFile) throws CommandLineException, MavenInvocationException {
-		executeGoals( pomFile, "assembly:assembly -DdescriptorId=jar-with-dependencies" );
+		executeGoals(pomFile, "assembly:assembly -DdescriptorId=jar-with-dependencies");
 	}
 
-	private void install(File pomFile) throws MavenInvocationException, CommandLineException {
-		executeGoals( pomFile, "install" );
+	private void install(File pomFile, boolean runTests) throws MavenInvocationException, CommandLineException {
+		executeGoals( pomFile, skipTestsIfNeeded("install", runTests) );
 	}
 
-	private void deploy(File pomFile) throws MavenInvocationException, CommandLineException {
-		executeGoals( pomFile, "clean", "deploy" );
+	private void deploy(File pomFile, boolean runTests) throws MavenInvocationException, CommandLineException {
+		executeGoals( pomFile, "clean", skipTestsIfNeeded("deploy", runTests) );
+	}
+
+	private String skipTestsIfNeeded(String goal, boolean runTests) {
+		if( !runTests ) {
+			goal += " -Dmaven.test.skip=true";
+		}
+		return goal;
 	}
 	
 	private void executeGoals( File pomFile, String ... goals ) throws CommandLineException, MavenInvocationException {

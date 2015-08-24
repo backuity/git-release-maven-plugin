@@ -25,9 +25,13 @@ public class ReleaseFirstMojo extends AbstractMojo {
 	@Parameter(defaultValue = "false")
 	private boolean skipPush;
 
+    /** Shall we run the tests prior to deploy */
+    @Parameter(defaultValue = "false")
+    private boolean runTests;
+
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		try {			
-			new ReleaseProcessor( getLog() ).releaseFirst( project, installWithDependencies, skipPush );
+			new ReleaseProcessor( getLog() ).releaseFirst( project, installWithDependencies, runTests, skipPush );
 		} catch (Exception e) {
 			throw new MojoExecutionException(e.getMessage(), e);
 		}

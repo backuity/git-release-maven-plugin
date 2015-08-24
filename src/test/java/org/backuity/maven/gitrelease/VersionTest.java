@@ -1,14 +1,10 @@
 package org.backuity.maven.gitrelease;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import junit.framework.Assert;
-
-import org.fest.assertions.Assertions;
 import org.junit.Test;
+
+import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 
 public class VersionTest {
@@ -33,7 +29,7 @@ public class VersionTest {
 	
 	@Test
 	public void testIsGreater() {
-		assertTrue( isGreater( "1.3.0", "1.2.1-SNAPSHOT" ) );
+		assertTrue(isGreater("1.3.0", "1.2.1-SNAPSHOT"));
 		assertTrue( isGreater( "2.3.0", "1.8.9" ) );
 		assertTrue( isGreater( "1.0.0", "1.0.0-SNAPSHOT" ) );
 		assertFalse( isGreater( "1.0.2", "1.0.19" ) );

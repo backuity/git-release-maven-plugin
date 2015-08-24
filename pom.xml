@@ -103,6 +103,7 @@
 					<cloneClean>true</cloneClean>
 					<pomIncludes>
 						<pomInclude>multimodule/pom.xml</pomInclude>
+						<pomInclude>no-tests-by-default/pom.xml</pomInclude>
 					</pomIncludes>
 					<localRepositoryPath>${project.build.directory}/it-repo</localRepositoryPath>
 					<preBuildHookScript>setup</preBuildHookScript>

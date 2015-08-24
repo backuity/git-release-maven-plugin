@@ -1,6 +1,7 @@
 pom = new File( basedir, 'pom.xml' )
 project = new XmlSlurper().parse( pom )
 assert '0.2.1-SNAPSHOT' == project.version.text()
+assert ! new File(basedir, 'pom.xml.versionsBackup').exists()
 
 moduleA = new File(basedir,'module-a/pom.xml')
 projectA = new XmlSlurper().parse(moduleA)
