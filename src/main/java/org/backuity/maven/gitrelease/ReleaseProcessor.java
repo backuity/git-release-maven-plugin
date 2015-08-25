@@ -307,7 +307,7 @@ public class ReleaseProcessor {
 
 	private String skipTestsIfNeeded(String goal, boolean runTests) {
 		if( !runTests ) {
-			goal += " -Dmaven.test.skip=true";
+			goal += " -DskipTests";
 		}
 		return goal;
 	}
